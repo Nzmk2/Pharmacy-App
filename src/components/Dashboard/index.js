@@ -8,6 +8,9 @@ import Edit from './Edit';
 
 import { employeesData } from '../../data';
 
+import { collection, getDocs } from "firebase/firestore"; 
+
+
 const Dashboard = ({ setIsAuthenticated }) => {
   const [employees, setEmployees] = useState(employeesData);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
