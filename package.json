@@ -2,8 +2,8 @@
   "name": "crud-app",
   "version": "3.3.0",
   "engines": {
-    "node": "18.x",
-    "npm": "9.x"
+    "node": "18.14.1",
+    "npm": "9.5.0"
   },
   "private": true,
   "homepage": "https://safdarjamal.github.io/crud-app/",
