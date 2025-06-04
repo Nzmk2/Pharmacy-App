@@ -7,8 +7,16 @@ const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
 
   useEffect(() => {
-    setIsAuthenticated(JSON.parse(localStorage.getItem('is_authenticated')));
+    const storedAuth = JSON.parse(localStorage.getItem('is_authenticated'));
+    setIsAuthenticated(storedAuth);
   }, []);
+
+  // Sync localStorage setiap isAuthenticated berubah
+  useEffect(() => {
+    if (isAuthenticated !== null) {
+      localStorage.setItem('is_authenticated', JSON.stringify(isAuthenticated));
+    }
+  }, [isAuthenticated]);
 
   return (
     <>

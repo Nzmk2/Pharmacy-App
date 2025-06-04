@@ -1,102 +1,75 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
+import { collection, addDoc } from "firebase/firestore";
+import { db } from '../../config/firestore';
 
-const Add = ({ employees, setEmployees, setIsAdding }) => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [salary, setSalary] = useState('');
-  const [date, setDate] = useState('');
+const Add = ({ medicines, setMedicines, setIsAdding }) => {
+  const [medicineName, setMedicineName] = useState('');
+  const [medicineType, setMedicineType] = useState('');
+  const [indications, setIndications] = useState('');
+  const [sideEffect, setSideEffect] = useState('');
+  const [price, setPrice] = useState('');
+  const [stock, setStock] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleAdd = e => {
+  const handleAdd = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
-    if (!firstName || !lastName || !email || !salary || !date) {
-      return Swal.fire({
+    try {
+      const newMedicine = {
+        medicineName,
+        medicineType,
+        indications,
+        sideEffect,
+        price: Number(price),
+        Stock: Number(stock),
+        createdAt: new Date().toISOString(),
+      };
+
+      const docRef = await addDoc(collection(db, "medicine"), newMedicine);
+      setMedicines([...medicines, { id: docRef.id, ...newMedicine }]);
+      setIsAdding(false);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Added!',
+        text: 'New medicine has been added successfully.',
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
         icon: 'error',
-        title: 'Error!',
-        text: 'All fields are required.',
+        title: 'Failed to add medicine',
+        text: error.message,
         showConfirmButton: true,
       });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const newEmployee = {
-      firstName,
-      lastName,
-      email,
-      salary,
-      date,
-    };
-
-    employees.push(newEmployee);
-
-    // TODO: Add doc to DB
-
-    setEmployees(employees);
-    setIsAdding(false);
-
-    Swal.fire({
-      icon: 'success',
-      title: 'Added!',
-      text: `${firstName} ${lastName}'s data has been Added.`,
-      showConfirmButton: false,
-      timer: 1500,
-    });
   };
 
   return (
     <div className="small-container">
       <form onSubmit={handleAdd}>
-        <h1>Add Employee</h1>
-        <label htmlFor="firstName">First Name</label>
-        <input
-          id="firstName"
-          type="text"
-          name="firstName"
-          value={firstName}
-          onChange={e => setFirstName(e.target.value)}
-        />
-        <label htmlFor="lastName">Last Name</label>
-        <input
-          id="lastName"
-          type="text"
-          name="lastName"
-          value={lastName}
-          onChange={e => setLastName(e.target.value)}
-        />
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          name="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-        />
-        <label htmlFor="salary">Salary ($)</label>
-        <input
-          id="salary"
-          type="number"
-          name="salary"
-          value={salary}
-          onChange={e => setSalary(e.target.value)}
-        />
-        <label htmlFor="date">Date</label>
-        <input
-          id="date"
-          type="date"
-          name="date"
-          value={date}
-          onChange={e => setDate(e.target.value)}
-        />
-        <div style={{ marginTop: '30px' }}>
-          <input type="submit" value="Add" />
-          <input
-            style={{ marginLeft: '12px' }}
-            className="muted-button"
-            type="button"
-            value="Cancel"
-            onClick={() => setIsAdding(false)}
-          />
+        <h1>Add Medicine</h1>
+        <label htmlFor="medicineName">Medicine Name</label>
+        <input id="medicineName" type="text" value={medicineName} onChange={(e) => setMedicineName(e.target.value)} required disabled={isSubmitting} />
+        <label htmlFor="medicineType">Medicine Type</label>
+        <input id="medicineType" type="text" value={medicineType} onChange={(e) => setMedicineType(e.target.value)} required disabled={isSubmitting} />
+        <label htmlFor="indications">Indications</label>
+        <textarea id="indications" value={indications} onChange={(e) => setIndications(e.target.value)} rows="3" required disabled={isSubmitting} />
+        <label htmlFor="sideEffect">Side Effects</label>
+        <textarea id="sideEffect" value={sideEffect} onChange={(e) => setSideEffect(e.target.value)} rows="3" required disabled={isSubmitting} />
+        <label htmlFor="price">Price</label>
+        <input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} required disabled={isSubmitting} />
+        <label htmlFor="stock">Stock</label>
+        <input id="stock" type="number" value={stock} onChange={(e) => setStock(e.target.value)} required disabled={isSubmitting} />
+        <div style={{ marginTop: '12px' }}>
+          <button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Adding...' : 'Add'}</button>
+          <button type="button" onClick={() => setIsAdding(false)} className="muted-button" disabled={isSubmitting}>Cancel</button>
         </div>
       </form>
     </div>

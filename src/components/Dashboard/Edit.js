@@ -1,19 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from '../../config/firestore';
 
-const Edit = ({ employees, selectedEmployee, setEmployees, setIsEditing }) => {
-  const id = selectedEmployee.id;
+const Edit = ({ medicines, selectedMedicine, setMedicines, setIsEditing, getMedicines }) => {
+  const [medicineName, setMedicineName] = useState('');
+  const [medicineType, setMedicineType] = useState('');
+  const [indications, setIndications] = useState('');
+  const [sideEffect, setSideEffect] = useState('');
+  const [price, setPrice] = useState('');
+  const [stock, setStock] = useState('');
 
-  const [firstName, setFirstName] = useState(selectedEmployee.firstName);
-  const [lastName, setLastName] = useState(selectedEmployee.lastName);
-  const [email, setEmail] = useState(selectedEmployee.email);
-  const [salary, setSalary] = useState(selectedEmployee.salary);
-  const [date, setDate] = useState(selectedEmployee.date);
+  useEffect(() => {
+    if (selectedMedicine) {
+      setMedicineName(selectedMedicine.medicineName || '');
+      setMedicineType(selectedMedicine.medicineType || '');
+      setIndications(selectedMedicine.indications || '');
+      setSideEffect(selectedMedicine.sideEffect || '');
+      setPrice(selectedMedicine.price || '');
+      setStock(selectedMedicine.Stock || '');
+    }
+  }, [selectedMedicine]);
 
-  const handleUpdate = e => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
 
-    if (!firstName || !lastName || !email || !salary || !date) {
+    if (!medicineName || !medicineType || !indications || !sideEffect || !price || !stock) {
       return Swal.fire({
         icon: 'error',
         title: 'Error!',
@@ -22,82 +34,120 @@ const Edit = ({ employees, selectedEmployee, setEmployees, setIsEditing }) => {
       });
     }
 
-    const employee = {
-      id,
-      firstName,
-      lastName,
-      email,
-      salary,
-      date,
+    const updatedMedicine = {
+      medicineName,
+      medicineType,
+      indications,
+      sideEffect,
+      price: Number(price),
+      Stock: Number(stock),
     };
 
-    // TODO: Update document
+    try {
+      const medicineDoc = doc(db, "medicine", selectedMedicine.id);
+      await updateDoc(medicineDoc, updatedMedicine);
 
-    setEmployees(employees);
-    setIsEditing(false);
+      const medicinesCopy = [...medicines];
+      const index = medicinesCopy.findIndex(med => med.id === selectedMedicine.id);
+      medicinesCopy[index] = { id: selectedMedicine.id, ...updatedMedicine };
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Updated!',
-      text: `${employee.firstName} ${employee.lastName}'s data has been updated.`,
-      showConfirmButton: false,
-      timer: 1500,
-    });
+      setMedicines(medicinesCopy);
+      setIsEditing(false);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Updated!',
+        text: 'Medicine data has been updated.',
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to update medicine',
+        text: error.message,
+        showConfirmButton: true,
+      });
+    }
   };
 
   return (
     <div className="small-container">
       <form onSubmit={handleUpdate}>
-        <h1>Edit Employee</h1>
-        <label htmlFor="firstName">First Name</label>
+        <h1>Edit Medicine</h1>
+
+        <label htmlFor="medicineName">Medicine Name</label>
         <input
-          id="firstName"
+          id="medicineName"
           type="text"
-          name="firstName"
-          value={firstName}
-          onChange={e => setFirstName(e.target.value)}
+          name="medicineName"
+          placeholder="Medicine Name"
+          value={medicineName}
+          onChange={e => setMedicineName(e.target.value)}
         />
-        <label htmlFor="lastName">Last Name</label>
+
+        <label htmlFor="medicineType">Medicine Type</label>
         <input
-          id="lastName"
+          id="medicineType"
           type="text"
-          name="lastName"
-          value={lastName}
-          onChange={e => setLastName(e.target.value)}
+          name="medicineType"
+          placeholder="Medicine Type (e.g., Tablet, Capsule, Syrup)"
+          value={medicineType}
+          onChange={e => setMedicineType(e.target.value)}
         />
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          name="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
+
+        <label htmlFor="indications">Indications</label>
+        <textarea
+          id="indications"
+          name="indications"
+          placeholder="Indications (what is this medicine used for)"
+          value={indications}
+          onChange={e => setIndications(e.target.value)}
+          rows="3"
         />
-        <label htmlFor="salary">Salary ($)</label>
+
+        <label htmlFor="sideEffect">Side Effects</label>
+        <textarea
+          id="sideEffect"
+          name="sideEffect"
+          placeholder="Side Effects"
+          value={sideEffect}
+          onChange={e => setSideEffect(e.target.value)}
+          rows="3"
+        />
+
+        <label htmlFor="price">Price</label>
         <input
-          id="salary"
+          id="price"
           type="number"
-          name="salary"
-          value={salary}
-          onChange={e => setSalary(e.target.value)}
+          step="0.01"
+          name="price"
+          placeholder="Price"
+          value={price}
+          onChange={e => setPrice(e.target.value)}
         />
-        <label htmlFor="date">Date</label>
+
+        <label htmlFor="stock">Stock</label>
         <input
-          id="date"
-          type="date"
-          name="date"
-          value={date}
-          onChange={e => setDate(e.target.value)}
+          id="stock"
+          type="number"
+          name="stock"
+          placeholder="Stock Quantity"
+          value={stock}
+          onChange={e => setStock(e.target.value)}
         />
-        <div style={{ marginTop: '30px' }}>
-          <input type="submit" value="Update" />
-          <input
+
+        <div style={{ marginTop: '12px' }}>
+          <button type="submit">Update</button>
+          <button
+            type="button"
+            onClick={() => setIsEditing(false)}
             style={{ marginLeft: '12px' }}
             className="muted-button"
-            type="button"
-            value="Cancel"
-            onClick={() => setIsEditing(false)}
-          />
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </div>
