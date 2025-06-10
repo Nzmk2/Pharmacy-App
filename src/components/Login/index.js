@@ -1,4 +1,3 @@
-// src/components/Login/login.js
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -116,12 +115,12 @@ const Login = ({ setIsAuthenticated }) => {
           disabled={isLoading}
         />
 
-        <div className="recaptcha-wrapper">
+        {<div className="recaptcha-wrapper">
           <ReCAPTCHA
             sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
             onChange={handleCaptchaChange}
           />
-        </div>
+        </div>}
 
         <button 
           type="submit" 
@@ -131,7 +130,7 @@ const Login = ({ setIsAuthenticated }) => {
             opacity: (isLoading || !captchaValue) ? 0.6 : 1,
             cursor: (isLoading || !captchaValue) ? 'not-allowed' : 'pointer'
           }}
-        >
+          >
           {isLoading ? 'Logging in...' : 'Login'}
         </button>
       </form>
