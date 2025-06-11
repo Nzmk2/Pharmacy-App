@@ -121,7 +121,7 @@ const Login = ({ setIsAuthenticated }) => {
             onChange={handleCaptchaChange}
           />
         </div>}
-
+          
         <button 
           type="submit" 
           disabled={isLoading || !captchaValue}
@@ -137,5 +137,7 @@ const Login = ({ setIsAuthenticated }) => {
     </div>
   );
 };
+
+console.log("ReCAPTCHA sitekey:", process.env.REACT_APP_RECAPTCHA_SITE_KEY);
 
 export default Login;
