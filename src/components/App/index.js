@@ -19,14 +19,17 @@ const App = () => {
   }, [isAuthenticated]);
 
   return (
-    <>
-      {isAuthenticated ? (
-        <Dashboard setIsAuthenticated={setIsAuthenticated} />
-      ) : (
-        <Login setIsAuthenticated={setIsAuthenticated} />
-      )}
-    </>
-  );
+  <>
+    {isAuthenticated === null ? (
+      <p>Loading...</p>
+    ) : isAuthenticated ? (
+      <Dashboard setIsAuthenticated={setIsAuthenticated} />
+    ) : (
+      <Login setIsAuthenticated={setIsAuthenticated} />
+    )}
+  </>
+);
+
 };
 
 export default App;
