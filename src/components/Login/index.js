@@ -138,6 +138,4 @@ const Login = ({ setIsAuthenticated }) => {
   );
 };
 
-console.log("ReCAPTCHA sitekey:", process.env.REACT_APP_RECAPTCHA_SITE_KEY);
-
 export default Login;
